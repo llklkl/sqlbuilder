@@ -1,9 +1,22 @@
-package sqlbuilder
+package tests
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/pingcap/tidb/parser"
+	_ "github.com/pingcap/tidb/parser/test_driver"
+
+	. "github.com/llklkl/sqlbuilder"
 )
+
+func sqlCheck(t *testing.T, sql string) {
+	parse := parser.New()
+	_, _, err := parse.Parse(sql, "", "")
+	if err != nil {
+		t.Errorf("bad sql [%s] err=%v", sql, err)
+	}
+}
 
 func TestSqlBuilder_Insert(t *testing.T) {
 	tests := []struct {
@@ -46,6 +59,7 @@ func TestSqlBuilder_Insert(t *testing.T) {
 			if !reflect.DeepEqual(args, tt.wantArgs) {
 				t.Errorf("Insert args got1 = %v, want %v", args, tt.wantArgs)
 			}
+			sqlCheck(t, sql)
 		})
 	}
 }
@@ -82,6 +96,7 @@ func TestSqlBuilder_Select(t *testing.T) {
 			if !reflect.DeepEqual(args, tt.wantArgs) {
 				t.Errorf("Selete args got1 = %v, want %v", args, tt.wantArgs)
 			}
+			sqlCheck(t, sql)
 		})
 	}
 }
