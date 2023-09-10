@@ -118,7 +118,7 @@ func TestSqlBuilder_Select(t *testing.T) {
 				t.Errorf("Select sql got = %v, want %v", sql, tt.wantSql)
 			}
 			if !reflect.DeepEqual(args, tt.wantArgs) {
-				t.Errorf("Selete args got1 = %v, want %v", args, tt.wantArgs)
+				t.Errorf("SELECT args got1 = %v, want %v", args, tt.wantArgs)
 			}
 			sqlCheck(t, sql)
 		})

@@ -1,9 +1,11 @@
 # sqlbuilder
 
+[简体中文](README_zh.md)
+
 A DML SQL simple statement construction tool, which supports chained calls.
 Supports generating `SELECT`, `UPDATE`, `DELETE` and `INSERT` simple statements.
 
-For the `SELETE` statement, some commonly used conditional filtering logic is built-in,
+For the `SELECT` statement, some commonly used conditional filtering logic is built-in,
 such as `Ge`, `Eq`, `Ne`, etc. More conditions can be customized through `Condition`.
 
 **hint**:
@@ -23,7 +25,7 @@ This function will interpret the parameters differently depending on the number 
 
 > func F(args ...string) *Field
 
-This function defines a `Field`, usually used for conditional filtering, or `SELETE` query fields.
+This function defines a `Field`, usually used for conditional filtering, or `SELECT` query fields.
 
 This function will interpret the parameters differently depending on the number of parameters:
 + When the number of parameters is 1, it is equivalent to `func (field string) *Field`
@@ -32,7 +34,7 @@ This function will interpret the parameters differently depending on the number 
 
 > func E(args ...string) *Expr
 
-This function defines an `Expr`, which is used when the `SELETE` statement requires a built-in function expression.
+This function defines an `Expr`, which is used when the `SELECT` statement requires a built-in function expression.
 
 This function will interpret the parameters differently depending on the number of parameters:
 + When the number of parameters is 1, it is equivalent to `func (expr string) *Expr`

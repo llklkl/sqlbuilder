@@ -3,7 +3,7 @@
 一个支持链式调用的 DML SQL 简单语句构造工具。
 支持生成 `SELECT`, `UPDATE`, `DELETE` 和 `INSERT` 简单的语句。
 
-对于 `SELETE` 语句，内置了部分常用的条件过滤逻辑，诸如 `Ge`, `Eq`, `Ne` 等，
+对于 `SELECT` 语句，内置了部分常用的条件过滤逻辑，诸如 `Ge`, `Eq`, `Ne` 等，
 更多的条件可以通过 `Condition` 的方式自定义过滤逻辑。
 
 提示:
@@ -23,7 +23,7 @@
 
 > func F(args ...string) *Field
 
-该函数用于定义一个 `Field`，通常用于条件过滤，或者 `SELETE` 查询字段。
+该函数用于定义一个 `Field`，通常用于条件过滤，或者 `SELECT` 查询字段。
 
 该函数会根据不同的参数个数，对参数进行不同的解释：
 + 参数个数为 1 时, 等价于 `func (field string) *Field`
@@ -32,7 +32,7 @@
 
 > func E(args ...string) *Expr
 
-该函数用于定义一个 `Expr`，在 `SELETE` 语句需要内置函数表达式时使用。
+该函数用于定义一个 `Expr`，在 `SELECT` 语句需要内置函数表达式时使用。
 
 该函数会根据不同的参数个数，对参数进行不同的解释：
 + 参数个数为 1 时, 等价于 `func (expr string) *Expr`
