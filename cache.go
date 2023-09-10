@@ -18,10 +18,10 @@ func buildQuestionMarks(n int) string {
 	b.Grow(2*n + 1)
 	b.WriteByte(openParentheses)
 	for i := 0; i < n; i++ {
-		b.WriteByte(questionMark)
-		if i+1 < n {
+		if i > 0 {
 			b.WriteByte(comma)
 		}
+		b.WriteByte(questionMark)
 	}
 	b.WriteByte(closeParentheses)
 

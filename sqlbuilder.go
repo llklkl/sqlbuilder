@@ -25,6 +25,16 @@ func (b *SqlBuilder) Select(kws ...Keyword) *selectBuilder {
 	return (*selectBuilder)(b).init(kws)
 }
 
+func (b *SqlBuilder) Delete(kws ...Keyword) *deleteBuilder {
+	b.init()
+	return (*deleteBuilder)(b).init(kws)
+}
+
+func (b *SqlBuilder) Update(kws ...Keyword) *updateBuilder {
+	b.init()
+	return (*updateBuilder)(b).init(kws)
+}
+
 type sqlBuilderBuild SqlBuilder
 
 func (b *sqlBuilderBuild) Build() (string, []any) {

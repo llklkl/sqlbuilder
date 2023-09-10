@@ -105,18 +105,14 @@ func (b *buffer) Table(t *Table) {
 
 func (b *buffer) Tables(tables []*Table) {
 	for i, t := range tables {
-		b.Table(t)
-		if i+1 < len(tables) {
+		if i > 0 {
 			b.Comma()
 		}
+		b.Table(t)
 	}
 }
 
 func (b *buffer) Expr(e *Expr) {
-	if e.Table != "" {
-		b.BackQuoteString(e.Table)
-		b.Dot()
-	}
 	b.WriteString(e.Expr)
 	if e.Alias != "" {
 		b.WriteString(" AS ")
@@ -126,10 +122,10 @@ func (b *buffer) Expr(e *Expr) {
 
 func (b *buffer) Exprs(exprs []*Expr) {
 	for i, e := range exprs {
-		b.Expr(e)
-		if i+1 < len(exprs) {
+		if i > 0 {
 			b.Comma()
 		}
+		b.Expr(e)
 	}
 }
 
@@ -147,28 +143,42 @@ func (b *buffer) Field(f *Field) {
 
 func (b *buffer) Fields(fields []*Field) {
 	for i, f := range fields {
-		b.Field(f)
-		if i+1 < len(fields) {
+		if i > 0 {
 			b.Comma()
 		}
+		b.Field(f)
 	}
 }
 
 func (b *buffer) Conditions(conditions []whereCondition) {
-	for _, c := range conditions {
-		c.write(b)
+	for i := range conditions {
+		if i > 0 {
+			b.Space()
+			b.WriteString("AND")
+			b.Space()
+		}
+		conditions[i].write(b)
+	}
+}
+
+func (b *buffer) ValueUpdater(vps []valueUpdater) {
+	for i := range vps {
+		if i > 0 {
+			b.Comma()
+		}
+		vps[i].write(b)
 	}
 }
 
 func (b *buffer) OrderSpecs(orderSpecs []*OrderSpec) {
 	for i, spec := range orderSpecs {
+		if i > 0 {
+			b.Comma()
+		}
 		b.Field(spec.Field)
 		if spec.OrderDirection != "" {
 			b.Space()
 			b.WriteString(string(spec.OrderDirection))
-		}
-		if i+1 < len(orderSpecs) {
-			b.Comma()
 		}
 	}
 }

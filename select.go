@@ -27,9 +27,15 @@ func (b *selectBuilder) init(kws []Keyword) *selectBuilder {
 	return b
 }
 
-func (b *selectBuilder) Fields(fields ...string) *selectBuilderExpr {
+func (b *selectBuilder) Field(fields ...string) *selectBuilderExpr {
 	b.buf.Space()
 	b.buf.BackQuoteStrings(fields)
+	return (*selectBuilderExpr)(b)
+}
+
+func (b *selectBuilder) FieldT(fields ...*Field) *selectBuilderExpr {
+	b.buf.Space()
+	b.buf.Fields(fields)
 	return (*selectBuilderExpr)(b)
 }
 
@@ -73,11 +79,9 @@ func (b *selectBuilderTable) Where(conditions ...whereCondition) *selectBuilderW
 	return (*selectBuilderWhere)(b).where(conditions)
 }
 
-func (b *selectBuilderJoin) join(typ string, table *Table) *selectBuilderJoin {
+func (b *selectBuilderJoin) join(joinType Keyword, table *Table) *selectBuilderJoin {
 	b.buf.Space()
-	b.buf.WriteString(typ)
-	b.buf.Space()
-	b.buf.WriteString("JOIN")
+	b.buf.WriteString(string(joinType))
 	b.buf.Space()
 	b.buf.Table(table)
 	return b
@@ -138,8 +142,12 @@ func (b *selectBuilderWhere) OrderBy(orderSpecs ...*OrderSpec) *selectBuilderOrd
 	return (*selectBuilderOrder)(b).order(orderSpecs)
 }
 
-func (b *selectBuilderWhere) Limit(args ...any) *selectBuilderLimit {
-	return (*selectBuilderLimit)(b).limit(args)
+func (b *selectBuilderWhere) Limit(limit any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit)
+}
+
+func (b *selectBuilderWhere) LimitOffset(limit, offset any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit, offset)
 }
 
 func (b *selectBuilderWhere) GroupBy(fields ...string) *selectBuilderGroup {
@@ -158,8 +166,12 @@ func (b *selectBuilderGroup) OrderBy(orderSpecs ...*OrderSpec) *selectBuilderOrd
 	return (*selectBuilderOrder)(b).order(orderSpecs)
 }
 
-func (b *selectBuilderGroup) Limit(args ...any) *selectBuilderLimit {
-	return (*selectBuilderLimit)(b).limit(args)
+func (b *selectBuilderGroup) Limit(limit any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit)
+}
+
+func (b *selectBuilderGroup) LimitOffset(limit, offset any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit, offset)
 }
 
 func (b *selectBuilderOrder) order(orderSpecs []*OrderSpec) *selectBuilderOrder {
@@ -170,15 +182,19 @@ func (b *selectBuilderOrder) order(orderSpecs []*OrderSpec) *selectBuilderOrder 
 	return b
 }
 
-func (b *selectBuilderOrder) Limit(args ...any) *selectBuilderLimit {
-	return (*selectBuilderLimit)(b).limit(args)
+func (b *selectBuilderOrder) Limit(limit any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit)
+}
+
+func (b *selectBuilderOrder) LimitOffset(limit, offset any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit, offset)
 }
 
 func (b *selectBuilderOrder) Build() (string, []any) {
 	return (*sqlBuilderBuild)(b).Build()
 }
 
-func (b *selectBuilderLimit) limit(args []any) *selectBuilderLimit {
+func (b *selectBuilderLimit) limit(args ...any) *selectBuilderLimit {
 	b.buf.Space()
 	b.buf.WriteString("LIMIT")
 	b.buf.Space()
@@ -189,7 +205,7 @@ func (b *selectBuilderLimit) limit(args []any) *selectBuilderLimit {
 		b.buf.Question()
 		b.buf.Comma()
 		b.buf.Question()
-		b.args = append(b.args, args...)
+		b.args = append(b.args, args[1], args[0])
 	}
 	return b
 }

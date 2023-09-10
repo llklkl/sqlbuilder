@@ -2,7 +2,10 @@ module tests
 
 go 1.21
 
-require github.com/llklkl/sqlbuilder v0.0.0-20230909073239-391d18e033af
+require (
+	github.com/llklkl/sqlbuilder v1.0.0
+	github.com/pingcap/tidb/parser v0.0.0-20230908161806-d3d30f5f556e
+)
 
 require (
 	github.com/benbjohnson/clock v1.3.5 // indirect
@@ -10,7 +13,6 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20210425183316-da1aaba5fb63 // indirect
 	github.com/pingcap/failpoint v0.0.0-20220801062533-2eaa32854a6c // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/parser v0.0.0-20230908161806-d3d30f5f556e // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -18,3 +20,5 @@ require (
 	golang.org/x/text v0.12.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
+
+replace github.com/llklkl/sqlbuilder v1.0.0 => ../
