@@ -17,7 +17,7 @@ var (
 
 func init() {
 	bufferPool = &sync.Pool{
-		New: func() any {
+		New: func() interface{} {
 			return newBuffer(defaultBufferSize)
 		},
 	}

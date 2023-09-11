@@ -76,6 +76,10 @@ func (b *selectBuilderTable) GroupBy(fields ...string) *selectBuilderGroup {
 	return (*selectBuilderGroup)(b).groupBy(fields)
 }
 
+func (b *selectBuilderTable) Build() (string, any) {
+	return (*sqlBuilderBuild)(b).Build()
+}
+
 func (b *selectBuilderJoin) join(joinType Keyword, table *Table) *selectBuilderJoin {
 	b.buf.Space()
 	b.buf.WriteString(string(joinType))
