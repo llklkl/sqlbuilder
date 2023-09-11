@@ -85,12 +85,6 @@ func (b *buffer) BackQuoteStrings(vals []string) {
 	b.WriteByte(backQuote)
 }
 
-func (b *buffer) ParenthesesString(val string) {
-	b.WriteByte(openParentheses)
-	b.WriteString(val)
-	b.WriteByte(closeParentheses)
-}
-
 func (b *buffer) Table(t *Table) {
 	if t.Database != "" {
 		b.BackQuoteString(t.Database)
@@ -147,6 +141,20 @@ func (b *buffer) Fields(fields []*Field) {
 			b.Comma()
 		}
 		b.Field(f)
+	}
+}
+
+func (b *buffer) SelectField(fields []_selectField) {
+	for i := range fields {
+		if i > 0 {
+			b.Comma()
+		}
+		switch v := fields[i].(type) {
+		case *Field:
+			b.Field(v)
+		case *Expr:
+			b.Expr(v)
+		}
 	}
 }
 

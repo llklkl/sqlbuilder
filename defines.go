@@ -25,20 +25,23 @@ const (
 	AndOperator ConditionOperator = "AND"
 	OrOperator  ConditionOperator = "OR"
 
-	BetweenOperator ConditionOperator = "BETWEEN"
-
-	InOperator    ConditionOperator = "IN"
-	NotInOperator ConditionOperator = "NOT IN"
-
-	ExistsOperator    ConditionOperator = "EXISTS"
-	NotExistsOperator ConditionOperator = "NOT EXISTS"
-
 	EqOperator ConditionOperator = "="
 	LtOperator ConditionOperator = "<"
 	LeOperator ConditionOperator = "<="
 	GtOperator ConditionOperator = ">"
 	GeOperator ConditionOperator = ">="
 	NeOperator ConditionOperator = "!="
+
+	BetweenOperator   ConditionOperator = "BETWEEN"
+	ExistsOperator    ConditionOperator = "EXISTS"
+	NotExistsOperator ConditionOperator = "NOT EXISTS"
+	LikeOperator      ConditionOperator = "LIKE"
+
+	InOperator    ConditionOperator = "IN"
+	NotInOperator ConditionOperator = "NOT IN"
+
+	IsNullOperator  ConditionOperator = "IS NULL"
+	NotNullOperator ConditionOperator = "IS NOT NULL"
 )
 
 const (
@@ -51,6 +54,10 @@ const (
 	questionMark     = '?'
 	backQuote        = '`'
 )
+
+type _selectField interface {
+	selectField()
+}
 
 type Table struct {
 	Table    string
@@ -84,6 +91,7 @@ func T(args ...string) *Table {
 }
 
 type Expr struct {
+	_selectField
 	Expr  string
 	Alias string
 }
@@ -108,6 +116,7 @@ func E(args ...string) *Expr {
 }
 
 type Field struct {
+	_selectField
 	Field string
 	Alias string
 	Table string

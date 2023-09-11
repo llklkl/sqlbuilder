@@ -80,6 +80,28 @@ func Between(f *Field, ge any, le any) *BinaryCondition {
 	}
 }
 
+func Like(f *Field, args ...any) *BinaryCondition {
+	return &BinaryCondition{
+		Field: f,
+		Op:    LikeOperator,
+		Args:  args,
+	}
+}
+
+func IsNull(f *Field) *UnaryCondition {
+	return &UnaryCondition{
+		Field: f,
+		Op:    IsNullOperator,
+	}
+}
+
+func NotNull(f *Field) *UnaryCondition {
+	return &UnaryCondition{
+		Field: f,
+		Op:    NotNullOperator,
+	}
+}
+
 func In(f *Field, args ...any) *InCondition {
 	return &InCondition{
 		Field: f,
@@ -139,6 +161,22 @@ func (c *BoolCondition) write(buf *buffer) {
 		cd.write(buf)
 	}
 	buf.CloseParen()
+}
+
+type UnaryCondition struct {
+	_whereCondition
+	Field *Field
+	Op    ConditionOperator
+}
+
+func (c *UnaryCondition) write(buf *buffer) {
+	buf.Field(c.Field)
+	buf.Space()
+	buf.WriteString(string(c.Op))
+}
+
+func (c *UnaryCondition) args() []any {
+	return nil
 }
 
 type BinaryCondition struct {

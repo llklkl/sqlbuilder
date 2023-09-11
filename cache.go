@@ -3,7 +3,7 @@ package sqlbuilder
 import "strings"
 
 const (
-	cacheQuestionMarkN = 50
+	cacheQuestionMarkN = 100
 )
 
 var (

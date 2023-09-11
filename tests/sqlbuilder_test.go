@@ -42,7 +42,7 @@ func TestSqlBuilder_Insert(t *testing.T) {
 				names := []string{"alice", "bob", "carol"}
 				return sb.New().Insert().Into("demo").
 					Fields("name", "age").
-					ValuesFn(len(ages), func(index int) []any {
+					Bulk(len(ages), func(index int) []any {
 						return []any{names[index], ages[index]}
 					}).Build()
 			},
@@ -56,7 +56,7 @@ func TestSqlBuilder_Insert(t *testing.T) {
 				names := []string{"alice", "bob", "carol"}
 				return sb.New().Insert().Into("demo").
 					Fields("name", "age").
-					ValuesFn(len(ages), func(index int) []any {
+					Bulk(len(ages), func(index int) []any {
 						return []any{names[index], ages[index]}
 					}).
 					OnDuplicate(
@@ -109,6 +109,48 @@ func TestSqlBuilder_Select(t *testing.T) {
 			},
 			wantSql:  "SELECT `c`.`class_name`,`s`.`name`,`s`.`score` FROM `t_student` AS `s` RIGHT JOIN `t_class` AS `c` USING (`class_id`) WHERE `c`.`class_name` = ? AND `s`.`score` >= ? ORDER BY `s`.`name` ASC LIMIT ?,?",
 			wantArgs: []any{"class1", 85, 10, 0},
+		},
+		{
+			name: "",
+			workFn: func() (string, []any) {
+				return sb.New().Select().
+					FieldT(sb.E("count(*)", "total")).
+					From("demo").
+					Where(
+						sb.Gt(sb.F("id"), 100),
+						sb.NotNull(sb.F("name")),
+					).Build()
+
+			},
+			wantSql:  "SELECT count(*) AS `total` FROM `demo` WHERE `id` > ? AND `name` IS NOT NULL",
+			wantArgs: []any{100},
+		},
+		{
+			name: "",
+			workFn: func() (string, []any) {
+				return sb.New().Select().
+					FieldT(sb.F("name"), sb.E("count(*)", "total")).
+					From("demo").
+					GroupBy("name").Build()
+			},
+			wantSql:  "SELECT `name`,count(*) AS `total` FROM `demo` GROUP BY `name`",
+			wantArgs: nil,
+		},
+		{
+			name: "",
+			workFn: func() (string, []any) {
+				return sb.New().Select().
+					Field("id", "name", "price").
+					From("products").
+					LeftJoin(sb.T("shop")).On(sb.F("shop_id"), sb.F("shop_id")).
+					InnerJoin(sb.T("product_price")).
+					Using("product_id").
+					Where(sb.Ge(sb.F("price"), 100)).
+					OrderBy(sb.Order(sb.F("name"), sb.Asc)).
+					LimitOffset(5, 10).Build()
+			},
+			wantSql:  "SELECT `id`,`name`,`price` FROM `products` LEFT JOIN `shop` ON `shop_id`=`shop_id` INNER JOIN `product_price` USING (`product_id`) WHERE `price` >= ? ORDER BY `name` ASC LIMIT ?,?",
+			wantArgs: []any{100, 10, 5},
 		},
 	}
 	for _, tt := range tests {

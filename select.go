@@ -33,16 +33,9 @@ func (b *selectBuilder) Field(fields ...string) *selectBuilderExpr {
 	return (*selectBuilderExpr)(b)
 }
 
-func (b *selectBuilder) FieldT(fields ...*Field) *selectBuilderExpr {
+func (b *selectBuilder) FieldT(fields ..._selectField) *selectBuilderExpr {
 	b.buf.Space()
-	b.buf.Fields(fields)
-	return (*selectBuilderExpr)(b)
-}
-
-func (b *selectBuilder) Expr(exprs ...*Expr) *selectBuilderExpr {
-	b.buf.Space()
-	b.buf.Exprs(exprs)
-
+	b.buf.SelectField(fields)
 	return (*selectBuilderExpr)(b)
 }
 
@@ -77,6 +70,10 @@ func (b *selectBuilderTable) InnerJoin(table *Table) *selectBuilderJoin {
 
 func (b *selectBuilderTable) Where(conditions ...whereCondition) *selectBuilderWhere {
 	return (*selectBuilderWhere)(b).where(conditions)
+}
+
+func (b *selectBuilderTable) GroupBy(fields ...string) *selectBuilderGroup {
+	return (*selectBuilderGroup)(b).groupBy(fields)
 }
 
 func (b *selectBuilderJoin) join(joinType Keyword, table *Table) *selectBuilderJoin {
@@ -123,6 +120,18 @@ func (b *selectBuilderJoinSpec) Where(conditions ...whereCondition) *selectBuild
 	return (*selectBuilderWhere)(b).where(conditions)
 }
 
+func (b *selectBuilderJoinSpec) Limit(limit any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit)
+}
+
+func (b *selectBuilderJoinSpec) LimitOffset(limit, offset any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit, offset)
+}
+
+func (b *selectBuilderJoinSpec) GroupBy(fields ...string) *selectBuilderGroup {
+	return (*selectBuilderGroup)(b).groupBy(fields)
+}
+
 func (b *selectBuilderWhere) where(conditions []whereCondition) *selectBuilderWhere {
 	b.buf.Space()
 	b.buf.WriteString("WHERE")
@@ -151,11 +160,15 @@ func (b *selectBuilderWhere) LimitOffset(limit, offset any) *selectBuilderLimit 
 }
 
 func (b *selectBuilderWhere) GroupBy(fields ...string) *selectBuilderGroup {
+	return (*selectBuilderGroup)(b).groupBy(fields)
+}
+
+func (b *selectBuilderGroup) groupBy(fields []string) *selectBuilderGroup {
 	b.buf.Space()
 	b.buf.WriteString("GROUP BY")
 	b.buf.Space()
 	b.buf.BackQuoteStrings(fields)
-	return (*selectBuilderGroup)(b)
+	return b
 }
 
 func (b *selectBuilderGroup) Build() (string, []any) {

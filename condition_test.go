@@ -21,8 +21,11 @@ func TestCondition_multiCondition(t *testing.T) {
 				Ne(F("ne"), 6),
 				Between(F("be"), 7, 8),
 				Condition("any_condition=?", 9),
+				NotNull(F("not_null")),
+				IsNull(F("is_null")),
+				Like(F("like")),
 			},
-			want: "`lt` < ? AND `le` <= ? AND `eq` = ? AND `ge` >= ? AND `gt` > ? AND `ne` != ? AND `be` BETWEEN ? AND ? AND any_condition=?",
+			want: "`lt` < ? AND `le` <= ? AND `eq` = ? AND `ge` >= ? AND `gt` > ? AND `ne` != ? AND `be` BETWEEN ? AND ? AND any_condition=? AND `not_null` IS NOT NULL AND `is_null` IS NULL AND `like` LIKE ?",
 		},
 		{
 			name: "",

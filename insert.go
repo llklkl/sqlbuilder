@@ -45,7 +45,7 @@ func (b *insertBuilderFields) Values(args ...any) *insertBuilderValues {
 	return (*insertBuilderValues)(b)
 }
 
-func (b *insertBuilderFields) ValuesFn(n int, argf func(index int) []any) *insertBuilderValues {
+func (b *insertBuilderFields) Bulk(n int, argf func(index int) []any) *insertBuilderValues {
 	b.buf.Space()
 	b.buf.WriteString("VALUES")
 	b.buf.Space()
