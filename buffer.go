@@ -114,15 +114,6 @@ func (b *buffer) Expr(e *Expr) {
 	}
 }
 
-func (b *buffer) Exprs(exprs []*Expr) {
-	for i, e := range exprs {
-		if i > 0 {
-			b.Comma()
-		}
-		b.Expr(e)
-	}
-}
-
 func (b *buffer) Field(f *Field) {
 	if f.Table != "" {
 		b.BackQuoteString(f.Table)
@@ -135,26 +126,23 @@ func (b *buffer) Field(f *Field) {
 	}
 }
 
-func (b *buffer) Fields(fields []*Field) {
-	for i, f := range fields {
-		if i > 0 {
-			b.Comma()
-		}
-		b.Field(f)
+func (b *buffer) AnyField(field any) {
+	switch v := field.(type) {
+	case *Field:
+		b.Field(v)
+	case *Expr:
+		b.Expr(v)
+	case string:
+		b.BackQuoteString(v)
 	}
 }
 
-func (b *buffer) SelectField(fields []_selectField) {
+func (b *buffer) AnyFields(fields []any) {
 	for i := range fields {
 		if i > 0 {
 			b.Comma()
 		}
-		switch v := fields[i].(type) {
-		case *Field:
-			b.Field(v)
-		case *Expr:
-			b.Expr(v)
-		}
+		b.AnyField(fields[i])
 	}
 }
 
@@ -183,7 +171,7 @@ func (b *buffer) OrderSpecs(orderSpecs []*OrderSpec) {
 		if i > 0 {
 			b.Comma()
 		}
-		b.Field(spec.Field)
+		b.AnyField(spec.Field)
 		if spec.OrderDirection != "" {
 			b.Space()
 			b.WriteString(string(spec.OrderDirection))

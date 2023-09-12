@@ -55,10 +55,6 @@ const (
 	backQuote        = '`'
 )
 
-type _selectField interface {
-	selectField()
-}
-
 type Table struct {
 	Table    string
 	Alias    string
@@ -91,7 +87,6 @@ func T(args ...string) *Table {
 }
 
 type Expr struct {
-	_selectField
 	Expr  string
 	Alias string
 }
@@ -116,7 +111,6 @@ func E(args ...string) *Expr {
 }
 
 type Field struct {
-	_selectField
 	Field string
 	Alias string
 	Table string
@@ -148,13 +142,13 @@ func F(args ...string) *Field {
 }
 
 type OrderSpec struct {
-	Field          *Field
+	Field          any
 	OrderDirection OrderDirection
 }
 
-func Order(f *Field, direction OrderDirection) *OrderSpec {
+func O(field any, direction OrderDirection) *OrderSpec {
 	return &OrderSpec{
-		Field:          f,
+		Field:          field,
 		OrderDirection: direction,
 	}
 }

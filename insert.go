@@ -8,6 +8,8 @@ type insertBuilderTable SqlBuilder
 
 type insertBuilderValues SqlBuilder
 
+type insertBuilderSelect SqlBuilder
+
 type insertBuilderDup SqlBuilder
 
 func (b *insertBuilder) init(kws []Keyword) *insertBuilder {
@@ -19,10 +21,19 @@ func (b *insertBuilder) init(kws []Keyword) *insertBuilder {
 	return b
 }
 
-func (b *insertBuilder) Into(tableName string) *insertBuilderTable {
+func (b *insertBuilder) Into(table string) *insertBuilderTable {
 	b.buf.Space()
-	b.buf.WriteString("INTO ")
-	b.buf.BackQuoteString(tableName)
+	b.buf.WriteString("INTO")
+	b.buf.Space()
+	b.buf.BackQuoteString(table)
+	return (*insertBuilderTable)(b)
+}
+
+func (b *insertBuilder) IntoT(table *Table) *insertBuilderTable {
+	b.buf.Space()
+	b.buf.WriteString("INTO")
+	b.buf.Space()
+	b.buf.Table(table)
 	return (*insertBuilderTable)(b)
 }
 
@@ -32,6 +43,10 @@ func (b *insertBuilderTable) Fields(fields ...string) *insertBuilderFields {
 	b.buf.BackQuoteStrings(fields)
 	b.buf.CloseParen()
 	return (*insertBuilderFields)(b)
+}
+
+func (b *insertBuilderTable) Select(subquery string, args ...any) *insertBuilderSelect {
+	return (*insertBuilderSelect)(b).selectSub(subquery, args)
 }
 
 func (b *insertBuilderFields) Values(args ...any) *insertBuilderValues {
@@ -71,6 +86,10 @@ func (b *insertBuilderFields) Bulk(n int, argf func(index int) []any) *insertBui
 	return (*insertBuilderValues)(b)
 }
 
+func (b *insertBuilderFields) Select(subquery string, args ...any) *insertBuilderSelect {
+	return (*insertBuilderSelect)(b).selectSub(subquery, args)
+}
+
 func (b *insertBuilderValues) OnDuplicate(vps ...valueUpdater) *insertBuilderDup {
 	b.buf.Space()
 	b.buf.WriteString("ON DUPLICATE KEY UPDATE")
@@ -83,6 +102,17 @@ func (b *insertBuilderValues) OnDuplicate(vps ...valueUpdater) *insertBuilderDup
 }
 
 func (b *insertBuilderValues) Build() (string, []any) {
+	return (*sqlBuilderBuild)(b).Build()
+}
+
+func (b *insertBuilderSelect) selectSub(subquery string, args []any) *insertBuilderSelect {
+	b.buf.Space()
+	b.buf.WriteString(subquery)
+	b.args = append(b.args, args...)
+	return b
+}
+
+func (b *insertBuilderSelect) Build() (string, []any) {
 	return (*sqlBuilderBuild)(b).Build()
 }
 

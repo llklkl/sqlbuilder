@@ -45,6 +45,9 @@ func (b *updateBuilderTable) Set(vps ...valueUpdater) *updateBuilderSet {
 }
 
 func (b *updateBuilderSet) Where(conditions ...whereCondition) *updateBuilderWhere {
+	if len(conditions) == 0 {
+		return (*updateBuilderWhere)(b)
+	}
 	b.buf.Space()
 	b.buf.WriteString("WHERE")
 	b.buf.Space()

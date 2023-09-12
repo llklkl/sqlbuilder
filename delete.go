@@ -29,6 +29,8 @@ func (b *deleteBuilder) From(table string) *deleteBuilderTable {
 
 func (b *deleteBuilder) FromT(table *Table) *deleteBuilderTable {
 	b.buf.Space()
+	b.buf.WriteString("FROM")
+	b.buf.Space()
 	b.buf.Table(table)
 	return (*deleteBuilderTable)(b)
 }
@@ -46,6 +48,14 @@ func (b *deleteBuilderTable) Where(conditions ...whereCondition) *deleteBuilderW
 		b.args = append(b.args, conditions[i].args()...)
 	}
 	return (*deleteBuilderWhere)(b)
+}
+
+func (b *deleteBuilderTable) Order(orderSpecs ...*OrderSpec) *deleteBuilderOrder {
+	return (*deleteBuilderOrder)(b).order(orderSpecs)
+}
+
+func (b *deleteBuilderTable) Limit(limit any) *deleteBuilderLimit {
+	return (*deleteBuilderLimit)(b).limit(limit)
 }
 
 func (b *deleteBuilderWhere) Order(orderSpecs ...*OrderSpec) *deleteBuilderOrder {

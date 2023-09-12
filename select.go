@@ -27,15 +27,13 @@ func (b *selectBuilder) init(kws []Keyword) *selectBuilder {
 	return b
 }
 
-func (b *selectBuilder) Field(fields ...string) *selectBuilderExpr {
+func (b *selectBuilder) Field(fields ...any) *selectBuilderExpr {
 	b.buf.Space()
-	b.buf.BackQuoteStrings(fields)
-	return (*selectBuilderExpr)(b)
-}
-
-func (b *selectBuilder) FieldT(fields ..._selectField) *selectBuilderExpr {
-	b.buf.Space()
-	b.buf.SelectField(fields)
+	if len(fields) == 0 {
+		b.buf.WriteByte('*')
+	} else {
+		b.buf.AnyFields(fields)
+	}
 	return (*selectBuilderExpr)(b)
 }
 
@@ -72,11 +70,23 @@ func (b *selectBuilderTable) Where(conditions ...whereCondition) *selectBuilderW
 	return (*selectBuilderWhere)(b).where(conditions)
 }
 
-func (b *selectBuilderTable) GroupBy(fields ...string) *selectBuilderGroup {
+func (b *selectBuilderTable) GroupBy(fields ...any) *selectBuilderGroup {
 	return (*selectBuilderGroup)(b).groupBy(fields)
 }
 
-func (b *selectBuilderTable) Build() (string, any) {
+func (b *selectBuilderTable) OrderBy(orderSpecs ...*OrderSpec) *selectBuilderOrder {
+	return (*selectBuilderOrder)(b).order(orderSpecs)
+}
+
+func (b *selectBuilderTable) Limit(limit any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit)
+}
+
+func (b *selectBuilderTable) LimitOffset(limit, offset any) *selectBuilderLimit {
+	return (*selectBuilderLimit)(b).limit(limit, offset)
+}
+
+func (b *selectBuilderTable) Build() (string, []any) {
 	return (*sqlBuilderBuild)(b).Build()
 }
 
@@ -124,6 +134,14 @@ func (b *selectBuilderJoinSpec) Where(conditions ...whereCondition) *selectBuild
 	return (*selectBuilderWhere)(b).where(conditions)
 }
 
+func (b *selectBuilderJoinSpec) GroupBy(fields ...any) *selectBuilderGroup {
+	return (*selectBuilderGroup)(b).groupBy(fields)
+}
+
+func (b *selectBuilderJoinSpec) OrderBy(orderSpecs ...*OrderSpec) *selectBuilderOrder {
+	return (*selectBuilderOrder)(b).order(orderSpecs)
+}
+
 func (b *selectBuilderJoinSpec) Limit(limit any) *selectBuilderLimit {
 	return (*selectBuilderLimit)(b).limit(limit)
 }
@@ -132,11 +150,10 @@ func (b *selectBuilderJoinSpec) LimitOffset(limit, offset any) *selectBuilderLim
 	return (*selectBuilderLimit)(b).limit(limit, offset)
 }
 
-func (b *selectBuilderJoinSpec) GroupBy(fields ...string) *selectBuilderGroup {
-	return (*selectBuilderGroup)(b).groupBy(fields)
-}
-
 func (b *selectBuilderWhere) where(conditions []whereCondition) *selectBuilderWhere {
+	if len(conditions) == 0 {
+		return b
+	}
 	b.buf.Space()
 	b.buf.WriteString("WHERE")
 	b.buf.Space()
@@ -163,15 +180,15 @@ func (b *selectBuilderWhere) LimitOffset(limit, offset any) *selectBuilderLimit 
 	return (*selectBuilderLimit)(b).limit(limit, offset)
 }
 
-func (b *selectBuilderWhere) GroupBy(fields ...string) *selectBuilderGroup {
+func (b *selectBuilderWhere) GroupBy(fields ...any) *selectBuilderGroup {
 	return (*selectBuilderGroup)(b).groupBy(fields)
 }
 
-func (b *selectBuilderGroup) groupBy(fields []string) *selectBuilderGroup {
+func (b *selectBuilderGroup) groupBy(fields []any) *selectBuilderGroup {
 	b.buf.Space()
 	b.buf.WriteString("GROUP BY")
 	b.buf.Space()
-	b.buf.BackQuoteStrings(fields)
+	b.buf.AnyFields(fields)
 	return b
 }
 

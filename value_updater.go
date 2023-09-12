@@ -10,7 +10,7 @@ type valueUpdater interface {
 	write(*buffer)
 }
 
-func Set(field *Field, args ...any) *SetValuer {
+func Set(field any, args ...any) *SetValuer {
 	return &SetValuer{
 		Field: field,
 		Args:  args,
@@ -26,12 +26,12 @@ func Value(expr string, args ...any) *Valuer {
 
 type SetValuer struct {
 	_valueUpdater
-	Field *Field
+	Field any
 	Args  []any
 }
 
 func (v *SetValuer) write(buf *buffer) {
-	buf.Field(v.Field)
+	buf.AnyField(v.Field)
 	buf.Equal()
 	buf.Question()
 }

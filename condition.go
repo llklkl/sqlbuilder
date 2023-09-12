@@ -24,111 +24,113 @@ func Or(conditions ...whereCondition) *BoolCondition {
 	}
 }
 
-func Lt(f *Field, arg any) *BinaryCondition {
+func Lt(field any, arg any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
+		Field: field,
 		Op:    LtOperator,
 		Args:  []any{arg},
 	}
 }
 
-func Le(f *Field, arg any) *BinaryCondition {
+func Eq(field any, arg any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
-		Op:    LeOperator,
-		Args:  []any{arg},
-	}
-}
-
-func Eq(f *Field, arg any) *BinaryCondition {
-	return &BinaryCondition{
-		Field: f,
+		Field: field,
 		Op:    EqOperator,
 		Args:  []any{arg},
 	}
 }
 
-func Ge(f *Field, arg any) *BinaryCondition {
+func Le(field any, arg any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
+		Field: field,
+		Op:    LeOperator,
+		Args:  []any{arg},
+	}
+}
+
+func Ge(field any, arg any) *BinaryCondition {
+	return &BinaryCondition{
+		Field: field,
 		Op:    GeOperator,
 		Args:  []any{arg},
 	}
 }
 
-func Gt(f *Field, arg any) *BinaryCondition {
+func Gt(field any, arg any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
+		Field: field,
 		Op:    GtOperator,
 		Args:  []any{arg},
 	}
 }
 
-func Ne(f *Field, arg any) *BinaryCondition {
+func Ne(field any, arg any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
+		Field: field,
 		Op:    NeOperator,
 		Args:  []any{arg},
 	}
 }
 
-func Between(f *Field, ge any, le any) *BinaryCondition {
+func Between(field any, ge any, le any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
+		Field: field,
 		Op:    BetweenOperator,
 		Args:  []any{ge, le},
 	}
 }
 
-func Like(f *Field, args ...any) *BinaryCondition {
+func Like(field any, args ...any) *BinaryCondition {
 	return &BinaryCondition{
-		Field: f,
+		Field: field,
 		Op:    LikeOperator,
 		Args:  args,
 	}
 }
 
-func IsNull(f *Field) *UnaryCondition {
+func IsNull(field any) *UnaryCondition {
 	return &UnaryCondition{
-		Field: f,
+		Field: field,
 		Op:    IsNullOperator,
 	}
 }
 
-func NotNull(f *Field) *UnaryCondition {
+func NotNull(field any) *UnaryCondition {
 	return &UnaryCondition{
-		Field: f,
+		Field: field,
 		Op:    NotNullOperator,
 	}
 }
 
-func In(f *Field, args ...any) *InCondition {
+func In(field any, args ...any) *InCondition {
 	return &InCondition{
-		Field: f,
+		Field: field,
 		Op:    InOperator,
 		Args:  args,
 	}
 }
 
-func NotIn(f *Field, args ...any) *InCondition {
+func NotIn(field any, args ...any) *InCondition {
 	return &InCondition{
-		Field: f,
+		Field: field,
 		Op:    NotInOperator,
 		Args:  args,
 	}
 }
 
-func Exists(subQuerySql string) *otherCondition {
-	return &otherCondition{
-		Op:   ExistsOperator,
-		Args: []any{subQuerySql},
+func Exists(subQuerySql string, args ...any) *SubqueryCondition {
+	return &SubqueryCondition{
+		Subquery: subQuerySql,
+		Op:       ExistsOperator,
+		Args:     args,
 	}
 }
 
-func NotExists(subQuerySql string) *otherCondition {
-	return &otherCondition{
-		Op:   NotExistsOperator,
-		Args: []any{subQuerySql},
+func NotExists(subQuerySql string, args ...any) *SubqueryCondition {
+	return &SubqueryCondition{
+		Subquery: subQuerySql,
+		Op:       NotExistsOperator,
+		Args:     args,
 	}
 }
 
@@ -165,12 +167,12 @@ func (c *BoolCondition) write(buf *buffer) {
 
 type UnaryCondition struct {
 	_whereCondition
-	Field *Field
+	Field any
 	Op    ConditionOperator
 }
 
 func (c *UnaryCondition) write(buf *buffer) {
-	buf.Field(c.Field)
+	buf.AnyField(c.Field)
 	buf.Space()
 	buf.WriteString(string(c.Op))
 }
@@ -181,7 +183,7 @@ func (c *UnaryCondition) args() []any {
 
 type BinaryCondition struct {
 	_whereCondition
-	Field *Field
+	Field any
 	Op    ConditionOperator
 	Args  []any
 }
@@ -189,7 +191,7 @@ type BinaryCondition struct {
 func (c *BinaryCondition) write(buf *buffer) {
 	switch c.Op {
 	case BetweenOperator:
-		buf.Field(c.Field)
+		buf.AnyField(c.Field)
 		buf.Space()
 		buf.WriteString(string(BetweenOperator))
 		buf.Space()
@@ -199,7 +201,7 @@ func (c *BinaryCondition) write(buf *buffer) {
 		buf.Space()
 		buf.Question()
 	default:
-		buf.Field(c.Field)
+		buf.AnyField(c.Field)
 		buf.Space()
 		buf.WriteString(string(c.Op))
 		buf.Space()
@@ -213,13 +215,13 @@ func (c *BinaryCondition) args() []any {
 
 type InCondition struct {
 	_whereCondition
-	Field *Field
+	Field any
 	Op    ConditionOperator
 	Args  []any
 }
 
 func (c *InCondition) write(buf *buffer) {
-	buf.Field(c.Field)
+	buf.AnyField(c.Field)
 	buf.Space()
 	buf.WriteString(string(c.Op))
 	buf.Space()
@@ -230,31 +232,28 @@ func (c *InCondition) args() []any {
 	return c.Args
 }
 
-type otherCondition struct {
+type SubqueryCondition struct {
 	_whereCondition
-	Field *Field
-	Op    ConditionOperator
-	Args  []any
+	Field    any
+	Subquery string
+	Op       ConditionOperator
+	Args     []any
 }
 
-func (c *otherCondition) write(buf *buffer) {
-	switch c.Op {
-	case ExistsOperator, NotExistsOperator:
-		buf.WriteString(string(c.Op))
+func (c *SubqueryCondition) write(buf *buffer) {
+	if c.Field != nil {
+		buf.AnyField(c.Field)
 		buf.Space()
-		buf.OpenParen()
-		buf.WriteString(c.Args[0].(string))
-		buf.CloseParen()
 	}
+	buf.WriteString(string(c.Op))
+	buf.Space()
+	buf.OpenParen()
+	buf.WriteString(c.Subquery)
+	buf.CloseParen()
 }
 
-func (c *otherCondition) args() []any {
-	switch c.Op {
-	case ExistsOperator, NotExistsOperator:
-		return nil
-	default:
-		return nil
-	}
+func (c *SubqueryCondition) args() []any {
+	return c.Args
 }
 
 type AnyCondition struct {
