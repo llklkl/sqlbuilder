@@ -1,5 +1,8 @@
 # sqlbuilder
 
+[![Coverage Status](https://coveralls.io/repos/github/llklkl/sqlbuilder/badge.svg?branch=main)](https://coveralls.io/github/llklkl/sqlbuilder?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/llklkl/sqlbuilder)](https://goreportcard.com/report/github.com/llklkl/sqlbuilder)
+
 一个支持链式调用的 DML SQL 简单语句构造工具。
 支持生成 `SELECT`, `UPDATE`, `DELETE` 和 `INSERT` 简单的语句。
 
@@ -26,6 +29,7 @@
     * [func T(args ...string) *Table](#func-targs-string-table)
     * [func F(args ...string) *Field](#func-fargs-string-field)
     * [func E(args ...string) *Expr](#func-eargs-string-expr)
+    * [func O(field any, direction OrderDirection) *OrderSpec](#func-ofield-any-direction-orderdirection-orderspec)
   * [开源协议](#开源协议)
 <!-- TOC -->
 
@@ -142,7 +146,7 @@ import (
 
 func main() {
 	sql, args := sb.New().Select().
-		FieldT(
+		Field(
 			sb.F("c", "class_name"),
 			sb.F("s", "name"),
 			sb.F("s", "score"),
@@ -153,7 +157,7 @@ func main() {
 			sb.Eq(sb.F("c", "class_name"), "class1"),
 			sb.Ge(sb.F("s", "score"), 85),
 		).
-		OrderBy(sb.Order(sb.F("s", "name"), sb.Asc)).
+		OrderBy(sb.O(sb.F("s", "name"), sb.Asc)).
 		LimitOffset(0, 10).Build()
 	fmt.Println(sql)
 	fmt.Println(args)
@@ -220,7 +224,7 @@ import (
 func main() {
 	sql, args := sb.New().Delete().From("demo").
 		Where(sb.Ge(sb.F("age"), 20)).
-		Order(sb.Order(sb.F("name"), sb.Desc)).
+		Order(sb.O(sb.F("name"), sb.Desc)).
 		Limit(10).Build()
 	fmt.Println(sql)
 	fmt.Println(args)
@@ -283,6 +287,10 @@ func main() {
 
 + 参数个数为 1 时, 等价于 `func (expr string) *Expr`
 + 参数个数为 2 时, 等价于 `func (expr, alias string) *Expr`
+
+### func O(field any, direction OrderDirection) *OrderSpec
+
+该函数用于定义一个 `OrderSpec`，在 Select ... Order By 时用于指定排序字段。
 
 ## 开源协议
 

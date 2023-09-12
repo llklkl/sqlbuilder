@@ -1,5 +1,8 @@
 # sqlbuilder
 
+[![Coverage Status](https://coveralls.io/repos/github/llklkl/sqlbuilder/badge.svg?branch=main)](https://coveralls.io/github/llklkl/sqlbuilder?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/llklkl/sqlbuilder)](https://goreportcard.com/report/github.com/llklkl/sqlbuilder)
+
 [简体中文](README_zh.md)
 
 A DML SQL simple statement construction tool, which supports chained calls.
@@ -29,6 +32,7 @@ Supports generating `SELECT`, `UPDATE`, `DELETE` and `INSERT` simple statements.
     * [func T(args ...string) *Table](#func-targs-string-table)
     * [func F(args ...string) *Field](#func-fargs-string-field)
     * [func E(args ...string) *Expr](#func-eargs-string-expr)
+    * [func O(field any, direction OrderDirection) *OrderSpec](#func-ofield-any-direction-orderdirection-orderspec)
   * [License](#license)
 <!-- TOC -->
 
@@ -146,7 +150,7 @@ import (
 
 func main() {
 	sql, args := sb.New().Select().
-		FieldT(
+		Field(
 			sb.F("c", "class_name"),
 			sb.F("s", "name"),
 			sb.F("s", "score"),
@@ -157,7 +161,7 @@ func main() {
 			sb.Eq(sb.F("c", "class_name"), "class1"),
 			sb.Ge(sb.F("s", "score"), 85),
 		).
-		OrderBy(sb.Order(sb.F("s", "name"), sb.Asc)).
+		OrderBy(sb.O(sb.F("s", "name"), sb.Asc)).
 		LimitOffset(0, 10).Build()
 	fmt.Println(sql)
 	fmt.Println(args)
@@ -224,7 +228,7 @@ import (
 func main() {
 	sql, args := sb.New().Delete().From("demo").
 		Where(sb.Ge(sb.F("age"), 20)).
-		Order(sb.Order(sb.F("name"), sb.Desc)).
+		Order(sb.O(sb.F("name"), sb.Desc)).
 		Limit(10).Build()
 	fmt.Println(sql)
 	fmt.Println(args)
@@ -289,6 +293,10 @@ This function will interpret the parameters differently depending on the number 
 
 + When the number of parameters is 1, it is equivalent to `func (expr string) *Expr`
 + When the number of parameters is 2, it is equivalent to `func (expr, alias string) *Expr`
+
+### func O(field any, direction OrderDirection) *OrderSpec
+
+This function defines an OrderSpec for Select...Order to specify the sorting field.
 
 ## License
 
